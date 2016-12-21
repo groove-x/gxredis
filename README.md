@@ -5,7 +5,7 @@ Simple [redis-py](https://redis-py.readthedocs.io/en/latest/) wrapper library
 
 ## Usage
 
-```
+``` python
 >>> import redis
 >>> from gxredis import *
 

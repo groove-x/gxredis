@@ -129,7 +129,7 @@ class RedisList(RedisType):
 
     def lrange_mget_json(self, start, stop):
         u""" mget items by keys obtained by lrange and decode as json """
-        keys, values = self.mget(start, stop)
+        keys, values = self.lrange_mget(start, stop)
         items = []
         for x in values:
             if x is not None:
@@ -156,7 +156,7 @@ class RedisSet(RedisType):
 
     def smembers_mget_json(self):
         u""" mget items by keys obtained by smembers and decode as json """
-        keys, values = self.mget()
+        keys, values = self.smembers_mget()
         items = []
         for x in values:
             if x is not None:

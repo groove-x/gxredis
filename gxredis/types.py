@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-u""" Define wrappers for each Redis type """
+from __future__ import unicode_literals
+
+""" Define wrappers for each Redis type """
 import copy
 import functools
 import json
@@ -7,7 +9,7 @@ from abc import ABCMeta
 
 
 def _is_key_matured(key, key_params):
-    u""" key_params provides full information for key or not """
+    """ key_params provides full information for key or not """
     try:
         key.format(**key_params)
     except KeyError:
@@ -17,7 +19,7 @@ def _is_key_matured(key, key_params):
 
 
 class RedisType(object):
-    u""" Base class of Redis types """
+    """ Base class of Redis types """
 
     __metaclass__ = ABCMeta
     SUPPORTED_OPERATIONS = [
@@ -34,7 +36,7 @@ class RedisType(object):
         self._configure_attributes()
 
     def clone(self, **kwargs):
-        u""" create a copy of myself """
+        """ create a copy of myself """
         key = kwargs.get('key', self._key)
         redis_client = kwargs.get('redis_client', self._redis_client)
         key_params = kwargs.get('key_params', self._key_params)
@@ -48,7 +50,7 @@ class RedisType(object):
         return unicode(self).encode('utf-8')
 
     def __unicode__(self):
-        return u'{}(key="{}", key_params={})'.format(
+        return '{}(key="{}", key_params={})'.format(
             self.__class__.__name__, self._key, self._key_params)
 
     def __call__(self, **kwargs):
@@ -75,11 +77,11 @@ class RedisType(object):
                 setattr(self, operation, method)
 
     def is_matured(self):
-        u""" whether key_params support all parameters in key or not """
+        """ whether key_params support all parameters in key or not """
         return self._matured
 
     def is_type_consistent(self):
-        u""" whether type is consistent or not """
+        """ whether type is consistent or not """
         if not self._matured:
             raise RuntimeError(
                 "Only matured data is supported for consistency check")
@@ -87,109 +89,109 @@ class RedisType(object):
 
 
 class RedisString(RedisType):
-    u""" Redis String type """
+    """ Redis String type """
     SUPPORTED_OPERATIONS = RedisType.SUPPORTED_OPERATIONS + [
         'append', 'bitcount', 'bitpos', 'decr', 'get', 'getbit', 'getrange',
         'getset', 'incr', 'incrby', 'incrbyfloat', 'lock', 'psetex', 'set',
         'setbit', 'setex', 'setnx', 'setrange', 'strlen', 'substr']
-    REDIS_TYPE = 'string'
+    REDIS_TYPE = b'string'
 
     def get_json(self):
-        u""" get and decode as json """
+        """ get and decode as json """
         value = self.get()
         if value is not None:
-            return json.loads(value)
+            return json.loads(value.decode('utf-8'))
         return None
 
     def set_json(self, value):
-        u""" encode to json and set to redis """
+        """ encode to json and set to redis """
         value = json.dumps(value, ensure_ascii=False)
         return self.set(value)
 
     def setex_json(self, seconds, value):
-        u""" encode to json and setex to redis """
+        """ encode to json and setex to redis """
         value = json.dumps(value, ensure_ascii=False)
         return self.setex(seconds, value)
 
 
 class RedisList(RedisType):
-    u""" Redis List type """
+    """ Redis List type """
     SUPPORTED_OPERATIONS = RedisType.SUPPORTED_OPERATIONS + [
         'blpop', 'brpop', 'brpoplpush', 'lindex', 'linsert', 'llen', 'lpop',
         'lpush', 'lpushx', 'lrange', 'lrem', 'lset', 'ltrim', 'rpop',
         'rpoplpush', 'rpush', 'rpushx', 'sort']
-    REDIS_TYPE = 'list'
+    REDIS_TYPE = b'list'
 
     def lrange_mget(self, start, stop):
-        u""" mget items by keys obtained by lrange """
+        """ mget items by keys obtained by lrange """
         keys = self.lrange(start, stop)
         if not keys:
             return [], []
         return keys, self._redis_client.mget(list(keys))
 
     def lrange_mget_json(self, start, stop):
-        u""" mget items by keys obtained by lrange and decode as json """
+        """ mget items by keys obtained by lrange and decode as json """
         keys, values = self.lrange_mget(start, stop)
         items = []
         for x in values:
             if x is not None:
-                items.append(json.loads(x))
+                items.append(json.loads(x.decode('utf-8')))
             else:
                 items.append(None)
         return keys, items
 
 
 class RedisSet(RedisType):
-    u""" Redis Set type """
+    """ Redis Set type """
     SUPPORTED_OPERATIONS = RedisType.SUPPORTED_OPERATIONS + [
         'sadd', 'scard', 'sdiff', 'sdiffstore', 'sinter', 'sinterstore',
-        'sismember', 'smembers', 'smove', 'sort', 'spop', 'srandmember', 'srem',
-        'sscan', 'sscan_iter', 'sunion', 'sunionstore']
-    REDIS_TYPE = 'set'
+        'sismember', 'smembers', 'smove', 'sort', 'spop', 'srandmember',
+        'srem', 'sscan', 'sscan_iter', 'sunion', 'sunionstore']
+    REDIS_TYPE = b'set'
 
     def smembers_mget(self):
-        u""" mget items by keys obtained by smembers """
+        """ mget items by keys obtained by smembers """
         keys = self.smembers()
         if not keys:
             return [], []
         return keys, self._redis_client.mget(list(keys))
 
     def smembers_mget_json(self):
-        u""" mget items by keys obtained by smembers and decode as json """
+        """ mget items by keys obtained by smembers and decode as json """
         keys, values = self.smembers_mget()
         items = []
         for x in values:
             if x is not None:
-                items.append(json.loads(x))
+                items.append(json.loads(x.decode('utf-8')))
             else:
                 items.append(None)
         return keys, items
 
 
 class RedisHash(RedisType):
-    u""" Redis Hash type """
+    """ Redis Hash type """
     SUPPORTED_OPERATIONS = RedisType.SUPPORTED_OPERATIONS + [
         'hdel', 'hexists', 'hget', 'hgetall', 'hincrby', 'hincrbyfloat',
         'hkeys', 'hlen', 'hmget', 'hmset', 'hscan', 'hscan_iter', 'hset',
         'hsetnx', 'hvals']
-    REDIS_TYPE = 'hash'
+    REDIS_TYPE = b'hash'
 
 
 class RedisSortedSet(RedisType):
-    u""" Redis Sorted Set type """
+    """ Redis Sorted Set type """
     SUPPORTED_OPERATIONS = RedisType.SUPPORTED_OPERATIONS + [
         'sort', 'zadd', 'zcard', 'zcount', 'zincrby', 'zinterstore',
         'zlexcount', 'zrange', 'zrangebylex', 'zrangebyscore', 'zrank', 'zrem',
         'zremrangebylex', 'zremrangebyrank', 'zremrangebyscore', 'zrevrange',
-        'zrevrangebylex', 'zrevrangebyscore', 'zrevrank', 'zscan', 'zscan_iter',
-        'zscore', 'zunionstore']
-    REDIS_TYPE = 'zset'
+        'zrevrangebylex', 'zrevrangebyscore', 'zrevrank', 'zscan',
+        'zscan_iter', 'zscore', 'zunionstore']
+    REDIS_TYPE = b'zset'
 
 
 # Extended types
 
 # class RedisGeohash(RedisSortedSet):
-#     u""" Redis Geohash using Scored Set type """
+#     """ Redis Geohash using Scored Set type """
 #     SUPPORTED_OPERATIONS = RedisSortedSet.SUPPORTED_OPERATIONS + [
 #         'geoadd', 'geodist', 'geohash', 'geopos', 'georadius',
 #         'georadiusbymember']

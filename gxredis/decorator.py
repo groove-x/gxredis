@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 import functools
 import logging
 
@@ -9,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def ignore_redis_error(default=None):
-    u""" decorator for ignoring redis.RedisError
+    """ decorator for ignoring redis.RedisError
 
     :param default: default return value when RedisError is raised. It also can
                     be callable, which will be used as a factory for creating a

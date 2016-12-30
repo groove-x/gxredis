@@ -3,6 +3,15 @@ gxredis
 
 Simple `redis-py <https://redis-py.readthedocs.io/en/latest/>`_ wrapper library
 
+Installation
+------------
+
+To install gxredis, simply:
+
+.. code-block:: bash
+
+    $ sudo pip install gxredis
+
 
 Usage
 -----

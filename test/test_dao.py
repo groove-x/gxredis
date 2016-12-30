@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import redis
 from nose.tools import ok_, eq_, raises
 
@@ -30,7 +32,7 @@ def test_dao():
     dao = SampleDao(client)
 
     dao.item.set("abc")
-    eq_(dao.item.get(), "abc")
+    eq_(dao.item.get(), b"abc")
     ok_(dao.item.is_type_consistent())
 
     dao.item_list.lpush("abc")
@@ -56,7 +58,7 @@ def test_params():
 
     eq_(dao.item(item_id=1).key, "sample:1")
     dao.item(item_id=1).set("xyz")
-    eq_(dao.item(item_id=1).get(), "xyz")
+    eq_(dao.item(item_id=1).get(), b"xyz")
     ok_(dao.item(item_id=1).is_type_consistent())
     dao.item(item_id=1).delete("xyz")
 
@@ -66,7 +68,7 @@ def test_params_provided_by_dao():
     dao = ImmatureDao(client, key_params={"item_id": 1})
 
     dao.item.set("xyz")
-    eq_(dao.item.get(), "xyz")
+    eq_(dao.item.get(), b"xyz")
     ok_(dao.item.is_type_consistent())
     dao.item.delete()
 
@@ -94,10 +96,11 @@ def test_not_matured():
 
 @raises(AttributeError)
 def test_attribute_error():
-    u""" RedisType.__getattr__ 用のテスト """
+    """ Test for RedisType.__getattr__ """
     client = redis.StrictRedis(HOSTNAME, PORT, DB)
     dao = ImmatureDao(client)
     dao.item.foo
+
 
 def test_json():
     client = redis.StrictRedis(HOSTNAME, PORT, DB)
@@ -105,10 +108,11 @@ def test_json():
 
     value = {"hello": "world"}
     dao.item.set_json(value)
-    eq_(dao.item.get(), '{"hello": "world"}')
+    eq_(dao.item.get(), b'{"hello": "world"}')
     eq_(dao.item.get_json(), value)
 
-def test_mget():
+
+def test_lrange_mget():
     client = redis.StrictRedis(HOSTNAME, PORT, DB)
     dao = ImmatureDao(client)
 
@@ -122,5 +126,5 @@ def test_mget():
     keys, items = dao.item_list.lrange_mget(0, 100)
 
     eq_(len(items), 2)
-    eq_(keys, ["sample:2", "sample:1"])
-    eq_(items, ["b", "a"])
+    eq_(keys, [b"sample:2", b"sample:1"])
+    eq_(items, [b"b", b"a"])

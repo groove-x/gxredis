@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from .types import (
     RedisType, RedisString, RedisList, RedisSet, RedisHash, RedisSortedSet,
     RedisHyperLogLog,

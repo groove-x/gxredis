@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import redis
 from nose.tools import ok_, eq_, raises
 

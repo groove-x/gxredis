@@ -44,9 +44,6 @@ class RedisType(object):
         return self._key.format(**self._key_params)
 
     def __repr__(self):
-        return unicode(self).encode('utf-8')
-
-    def __unicode__(self):
         return '{}(key="{}", key_params={})'.format(
             self.__class__.__name__, self._key, self._key_params)
 

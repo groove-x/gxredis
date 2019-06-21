@@ -10,9 +10,6 @@ class RedisDao(object):
         self._set_instance_attributes()
 
     def __repr__(self):
-        return unicode(self).encode('utf-8')
-
-    def __unicode__(self):
         return '{}(key_params={})'.format(
             self.__class__.__name__, self._key_params)
 
@@ -53,9 +50,6 @@ class RedisPipeline(object):
         self._set_members(members)
 
     def __repr__(self):
-        return unicode(self).encode('utf-8')
-
-    def __unicode__(self):
         return '{}'.format(self.__class__.__name__)
 
     def _set_members(self, members):

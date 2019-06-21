@@ -15,7 +15,7 @@ setup(
     long_description=readme,
     url="https://github.com/groove-x/gxredis",
     author="Junya Hayashi",
-    author_email="junya-hayashi@groove-x.com",
+    author_email="junya.hayashi@groove-x.com",
     maintainer="Junya Hayashi",
     maintainer_email="junya-hayashi@groove-x.com",
     keywords=['Redis', 'key-value store'],

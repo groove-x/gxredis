@@ -1,3 +1,4 @@
+from .pubsub import RedisChannel
 from .types import RedisType
 
 
@@ -37,7 +38,7 @@ class RedisDao(object):
         definitions = {}
         for attr_name in dir(self):
             attr = getattr(self, attr_name)
-            if isinstance(attr, RedisType):
+            if isinstance(attr, (RedisType, RedisChannel)):
                 definitions[attr_name] = attr
         return definitions
 

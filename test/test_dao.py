@@ -4,6 +4,7 @@ import redis
 from gxredis import (
     RedisDao, RedisString, RedisList, RedisHash, RedisSet, RedisSortedSet,
 )
+from gxredis.pubsub import RedisChannel
 
 HOSTNAME = "localhost"
 PORT = 6379
@@ -16,11 +17,13 @@ class SampleDao(RedisDao):
     item_set = RedisSet(key="sample_set")
     item_hash = RedisHash(key="sample_hash")
     item_zset = RedisSortedSet(key="sample_zset")
+    item_channel = RedisChannel(channel="sample_channel")
 
 
 class ImmatureDao(RedisDao):
     item = RedisString(key="sample:{item_id}")
     item_list = RedisList(key="sample_list")
+    item_channel = RedisChannel(channel="channel:{item_id}")
 
 
 def test_dao():
@@ -47,6 +50,10 @@ def test_dao():
     assert dao.item_zset.is_type_consistent()
     dao.item_zset.zrem('a')
 
+    assert dao.item_channel.channel == "sample_channel"
+    assert dao.item_channel.is_matured()
+    dao.item_channel.publish("message")
+
 
 def test_params():
     client = redis.StrictRedis(HOSTNAME, PORT, DB)
@@ -58,6 +65,10 @@ def test_params():
     assert dao.item(item_id=1).is_type_consistent()
     dao.item(item_id=1).delete("xyz")
 
+    assert dao.item_channel(item_id=1).channel == "channel:1"
+    assert dao.item_channel(item_id=1).is_matured()
+    dao.item_channel(item_id=1).publish("message")
+
 
 def test_params_provided_by_dao():
     client = redis.StrictRedis(HOSTNAME, PORT, DB)
@@ -67,6 +78,10 @@ def test_params_provided_by_dao():
     assert dao.item.get() == b"xyz"
     assert dao.item.is_type_consistent()
     dao.item.delete()
+
+    assert dao.item_channel.channel == "channel:1"
+    assert dao.item_channel.is_matured()
+    dao.item_channel.publish("message")
 
 
 def test_pipeline():
@@ -79,6 +94,9 @@ def test_pipeline():
     pipe.item_list.lpush("a")
     pipe.item_list.lpush("b")
     assert dao.item_list.llen() == 0
+
+    pipe.item_channel.publish("message")
+
     pipe.execute()
     assert dao.item_list.llen() == 2
 

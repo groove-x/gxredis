@@ -4,15 +4,7 @@ import functools
 import json
 from abc import ABCMeta
 
-
-def _is_key_matured(key, key_params):
-    """ key_params provides full information for key or not """
-    try:
-        key.format(**key_params)
-    except KeyError:
-        return False
-    else:
-        return True
+from .util import is_key_matured
 
 
 class RedisType(object):
@@ -29,7 +21,7 @@ class RedisType(object):
         self._key = key
         self._redis_client = redis_client
         self._key_params = key_params or {}
-        self._matured = _is_key_matured(self._key, self._key_params)
+        self._matured = is_key_matured(self._key, self._key_params)
         self._configure_attributes()
 
     def clone(self, **kwargs):

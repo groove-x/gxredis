@@ -1,3 +1,4 @@
+from .pubsub import RedisChannel
 from .types import (
     RedisType, RedisString, RedisList, RedisSet, RedisHash, RedisSortedSet,
     RedisHyperLogLog,

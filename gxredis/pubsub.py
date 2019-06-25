@@ -1,6 +1,6 @@
 import copy
 
-from gxredis.types import _is_key_matured
+from .util import is_key_matured
 
 
 class RedisChannel(object):
@@ -10,7 +10,7 @@ class RedisChannel(object):
         self._channel = channel
         self._redis_client = redis_client
         self._key_params = key_params or {}
-        self._matured = _is_key_matured(self._channel, self._key_params)
+        self._matured = is_key_matured(self._channel, self._key_params)
 
     def clone(self, **kwargs):
         """ create a copy of myself """
